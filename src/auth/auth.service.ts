@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { compare, hash } from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { Users } from '../users/entities/users.entity';
 
@@ -10,9 +11,12 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  private readonly logger = new Logger();
+
   async validateUser(email: string, pass: string) {
     const user = await this.usersService.findOne(email);
-    if (user && user.password === pass) {
+    const passwordCompare = await compare(pass, user.password);
+    if (user && passwordCompare) {
       const { password, ...result } = user;
       return result;
     }
@@ -21,6 +25,20 @@ export class AuthService {
 
   async login(user: Users) {
     const payload = { username: user.email, sub: user.userId }; // check if username or email
+    console.log(payload);
     return { access_token: this.jwtService.sign(payload) };
+  }
+
+  async register(user: Users) {
+    const saltRounds = process.env.SALT_ROUNDS || 10;
+    const hashPassword = await hash(user.password, saltRounds);
+    user.password = hashPassword;
+    this.logger.log({ user });
+    try {
+      return this.usersService.create(user);
+    } catch (err) {
+      this.logger.error(err);
+      throw new BadRequestException('Error creating user. Please try again');
+    }
   }
 }

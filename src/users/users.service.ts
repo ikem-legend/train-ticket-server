@@ -1,7 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { Users } from './entities/users.entity';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Users } from './entities/users.entity';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -11,10 +12,10 @@ export class UsersService {
 
   async findOne(email: string) {
     return this.userModel.findOne({ email }).exec();
-    // const user = await this.userModel.findOne({ email });
-    // if (!user) {
-    //   throw new UnauthorizedException('User does not exist');
-    // }
-    // return user;
+  }
+
+  async create(createUser: CreateUserDto) {
+    const newUser = new this.userModel(createUser);
+    return newUser.save();
   }
 }

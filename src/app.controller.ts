@@ -1,4 +1,11 @@
-import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AppService } from './app.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -20,8 +27,15 @@ export class AppController {
 
   @UseGuards(LocalAuthGuard) // JwtGuard globally set but test this
   @Post('/auth/login')
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  async login(@Body() body) {
+    return this.authService.login(body);
+  }
+
+  @Public()
+  @Post('/auth/register')
+  async register(@Body() body) {
+    console.log(body);
+    return this.authService.register(body.user);
   }
 
   @UseGuards(JwtAuthGuard) // Globally set
