@@ -1,10 +1,12 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   Post,
   Request,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
@@ -17,7 +19,9 @@ export class AppController {
   constructor(
     private readonly appService: AppService,
     private readonly authService: AuthService,
-  ) {}
+  ) {
+    console.log(process.env.JWT_SECRET_KEY);
+  }
 
   @Public()
   @Get()
@@ -39,6 +43,7 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard) // Globally set
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;

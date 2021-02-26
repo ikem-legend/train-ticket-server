@@ -24,6 +24,7 @@ export class AuthService {
   }
 
   async login(user: Users) {
+    // fix sub to existing unique user ID
     const payload = { username: user.email, sub: user.userId }; // check if username or email
     console.log(payload);
     return { access_token: this.jwtService.sign(payload) };
