@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { Users } from '../users/entities/users.entity';
+import { generateUserId } from '../helpers/utils';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +35,8 @@ export class AuthService {
     const saltRounds = process.env.SALT_ROUNDS || 10;
     const hashPassword = await hash(user.password, saltRounds);
     user.password = hashPassword;
+    const userId = generateUserId();
+    user.userId = userId;
     this.logger.log({ user });
     try {
       return this.usersService.create(user);

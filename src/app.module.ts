@@ -9,11 +9,13 @@ import { TicketsModule } from './tickets/tickets.module';
 import { AuthModule } from './auth/auth.module';
 import * as Joi from 'joi';
 
+const nodeEnv = process.env.NODE_ENV;
+
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: !nodeEnv ? '.env' : `.env.${nodeEnv}`,
       load: [appConfig],
-      envFilePath: ['.env.development, .env.production'],
       isGlobal: true,
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()
@@ -26,7 +28,9 @@ import * as Joi from 'joi';
     UsersModule,
     TicketsModule,
     AuthModule,
-    MongooseModule.forRoot('mongodb://localhost:27020/train-ticket'),
+    MongooseModule.forRootAsync({
+      useFactory: () => ({ uri: appConfig().database }),
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -21,7 +21,7 @@ export class Users extends Document {
   phone: string;
 
   @Prop()
-  userId: string;
+  userId: number;
 
   @Prop()
   dateOfBirth: Date;

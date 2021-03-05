@@ -19,9 +19,7 @@ export class AppController {
   constructor(
     private readonly appService: AppService,
     private readonly authService: AuthService,
-  ) {
-    console.log(process.env.JWT_SECRET_KEY);
-  }
+  ) {}
 
   @Public()
   @Get()
