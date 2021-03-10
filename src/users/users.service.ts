@@ -14,6 +14,14 @@ export class UsersService {
     return this.userModel.findOne({ email }).exec();
   }
 
+  async findOneByUserId(userId: number) {
+    return this.userModel.findOne({ userId });
+  }
+
+  async findOneByPhone(phone: string) {
+    return this.userModel.findOne({ phone });
+  }
+
   async create(createUser: CreateUserDto) {
     const newUser = new this.userModel(createUser);
     return newUser.save();
