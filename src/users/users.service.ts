@@ -11,15 +11,17 @@ export class UsersService {
   ) {}
 
   async findOne(email: string) {
-    return this.userModel.findOne({ email }).exec();
+    // Since additional methods won't be used on this query,
+    // lean is used in place of exec
+    return this.userModel.findOne({ email }).lean();
   }
 
   async findOneByUserId(userId: number) {
-    return this.userModel.findOne({ userId });
+    return this.userModel.findOne({ userId }).exec();
   }
 
   async findOneByPhone(phone: string) {
-    return this.userModel.findOne({ phone });
+    return this.userModel.findOne({ phone }).exec();
   }
 
   async create(createUser: CreateUserDto) {
