@@ -17,7 +17,7 @@ import appConfig from '../config/app.config';
     JwtModule.registerAsync({
       useFactory: () => ({
         secret: appConfig().jwtSecretKey,
-        signOptions: { expiresIn: '5m' },
+        signOptions: { expiresIn: '1h' },
       }),
     }),
   ],
