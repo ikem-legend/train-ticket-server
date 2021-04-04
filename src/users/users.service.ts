@@ -24,6 +24,10 @@ export class UsersService {
     return this.userModel.findOne({ phone }).exec();
   }
 
+  async findAll() {
+    return this.userModel.find().lean();
+  }
+
   async create(createUser: CreateUserDto) {
     const newUser = new this.userModel(createUser);
     return newUser.save();
