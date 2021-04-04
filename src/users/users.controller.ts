@@ -8,6 +8,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Users } from './entities/users.entity';
 
 @Controller('users')
 export class UsersController {
@@ -18,6 +19,6 @@ export class UsersController {
   })
   @Get('profile')
   getProfile(@Request() req) {
-    return req.user;
+    return new Users(req.user);
   }
 }
