@@ -3,6 +3,7 @@ import {
   IsISO8601,
   IsPhoneNumber,
   IsString,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -35,6 +36,13 @@ export class CreateUserDto {
     message: 'Phone number is too short',
   })
   readonly phone: string;
+
+  @IsString()
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/, {
+    message:
+      'Password must contain at least 1 lowercase, 1 uppercase, 1 number and 8 characters',
+  })
+  readonly password: string;
 
   @IsEmail()
   readonly email: string;
