@@ -4,7 +4,7 @@ import { Document } from 'mongoose';
 @Schema()
 export class Trains extends Document {
   @Prop()
-  id: string;
+  customId: string;
 
   @Prop()
   class: string;

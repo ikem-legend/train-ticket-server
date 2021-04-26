@@ -7,6 +7,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { IsSumOf } from '../../common/decorators/sum.decorator';
 
 enum TrainClass {
   InterCity = 'InterCity',
@@ -31,10 +32,11 @@ export class CreateTrainDto {
   readonly type: string;
 
   @IsNumber()
-  @Min(50, {
+  @Min(20, {
     message:
       'Train capacity is too small. Minimum capacity is $constraint1, but actual is $value',
   })
+  @IsSumOf('firstClassCapacity', { message: 'Add correct sum' })
   readonly capacity: number;
 
   // Since most trains have first and economy classes,
