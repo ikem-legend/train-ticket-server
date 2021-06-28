@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { v4 as uuidv4 } from 'uuid';
-import { Trains } from './entities/trains.entity';
 import { Model } from 'mongoose';
+import { Trains } from './entities/trains.entity';
 import { CreateTrainDto } from './dto/create-train.dto';
 
 @Injectable()
@@ -16,11 +15,7 @@ export class TrainsService {
   }
 
   async create(createTrain: CreateTrainDto) {
-    const trainCustomId = uuidv4();
-    const updatedCreateTrain = Object.assign(createTrain, {
-      customId: trainCustomId,
-    });
-    const newTrain = new this.trainModel(updatedCreateTrain);
+    const newTrain = new this.trainModel(createTrain);
     return newTrain.save();
   }
 }

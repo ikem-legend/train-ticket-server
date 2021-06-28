@@ -33,8 +33,7 @@ export class AuthService {
 
   async register(user: Users) {
     const saltRounds = Number(this.configService.get('saltRounds', 10));
-    const hashPassword = await hash(user.password, saltRounds);
-    user.password = hashPassword;
+    user.password = await hash(user.password, saltRounds);
     const userId = generateUserId();
     user.userId = userId;
     // Check user ID existence before writing user to DB

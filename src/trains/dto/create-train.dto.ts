@@ -3,6 +3,7 @@ import {
   IsEnum,
   IsNumber,
   IsString,
+  Max,
   MaxLength,
   Min,
   MinLength,
@@ -31,29 +32,63 @@ export class CreateTrainDto {
   })
   readonly type: string;
 
+  @IsString()
+  @MinLength(3, {
+    message:
+      'Train ID is too short. Minimum length is $constraint1, but actual value is $value',
+  })
+  @MaxLength(20, {
+    message:
+      'Train ID is too long. Maximum length is $constraint1, but actual value is $value',
+  })
+  readonly customId: string;
+
   @IsNumber()
-  @Min(20, {
+  @Min(70, {
     message:
       'Train capacity is too small. Minimum capacity is $constraint1, but actual is $value',
+  })
+  @Max(160, {
+    message:
+      'Train capacity is too large. Maximum capacity is $constraint1, but actual is $value',
   })
   @IsSumOf('firstClassCapacity', { message: 'Add correct sum' })
   readonly capacity: number;
 
-  // Since most trains have first and economy classes,
+  // Since most trains have first, business and economy classes,
   // these should be specified while creating trains
   // TODO: Ensure that both capacities add up to total capacity
 
   @IsNumber()
-  @Min(6, {
+  @Min(10, {
     message:
-      'Train capacity is too small. Minimum capacity is $constraint1, but actual is $value',
+      'First class capacity is too small. Minimum capacity is $constraint1, but actual is $value',
+  })
+  @Max(20, {
+    message:
+      'First class capacity is too large. Maximum capacity is $constraint1, but actual is $value',
   })
   readonly firstClassCapacity: number;
 
   @IsNumber()
-  @Min(50, {
+  @Min(20, {
     message:
-      'Train capacity is too small. Minimum capacity is $constraint1, but actual is $value',
+      'Business class capacity is too small. Minimum capacity is $constraint1, but actual is $value',
+  })
+  @Max(40, {
+    message:
+      'Business class capacity is too large. Minimum capacity is $constraint1, but actual is $value',
+  })
+  readonly businessClassCapacity: number;
+
+  @IsNumber()
+  @Min(40, {
+    message:
+      'Economy capacity is too small. Minimum capacity is $constraint1, but actual is $value',
+  })
+  @Max(100, {
+    message:
+      'Train capacity is too large. Minimum capacity is $constraint1, but actual is $value',
   })
   readonly economyClassCapacity: number;
 
