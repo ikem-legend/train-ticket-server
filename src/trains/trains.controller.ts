@@ -2,6 +2,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -29,6 +30,16 @@ export class TrainsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
+  @SerializeOptions({
+    excludePrefixes: ['__'],
+  })
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.trainsService.findOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('/create')
   async create(@Body() body: CreateTrainDto) {
     return this.trainsService.create(body);
@@ -38,5 +49,11 @@ export class TrainsController {
   @Patch(':id')
   async update(@Param('id') id: string, @Body() body: CreateTrainDto) {
     return this.trainsService.update(id, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    return this.trainsService.delete(id);
   }
 }

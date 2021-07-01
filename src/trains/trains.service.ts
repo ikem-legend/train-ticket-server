@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { Trains, TrainsDocument } from './entities/trains.entity';
 import { CreateTrainDto } from './dto/create-train.dto';
 import { UpdateTrainDto } from './dto/update-train.dto';
-// set usefindandmodify to false globally
+
 @Injectable()
 export class TrainsService {
   constructor(
@@ -14,6 +14,18 @@ export class TrainsService {
 
   async findAll() {
     return this.trainModel.find().lean();
+  }
+
+  async findOne(id: string) {
+    return this.trainModel.findOne({ _id: id }).lean();
+  }
+
+  async findOneById(id: string) {
+    const train = await this.trainModel.findOne({ _id: id }).exec();
+    if (!train) {
+      throw new NotFoundException(`Train with ID ${id} not found`);
+    }
+    return train;
   }
 
   async create(createTrain: CreateTrainDto) {
@@ -36,5 +48,11 @@ export class TrainsService {
       throw new NotFoundException(`Train with ID ${id} not found`);
     }
     return 'Train updated successfully';
+  }
+
+  async delete(id: string) {
+    const existingTrain = await this.findOneById(id);
+    await existingTrain.remove();
+    return 'Train removed successfully';
   }
 }

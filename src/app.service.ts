@@ -7,6 +7,7 @@ export class AppService {
     // To prevent deprecated messages while using findOneAndUpdate, set useFindAndModify to false
     set('useFindAndModify', false);
   }
+
   getHello(): string {
     return 'Hello World!';
   }
