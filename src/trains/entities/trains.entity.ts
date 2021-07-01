@@ -13,13 +13,16 @@ export class Trains extends Document {
   type: string;
 
   @Prop()
-  capacity: number;
-
-  @Prop()
   firstClassCapacity: number;
 
   @Prop()
+  businessClassCapacity: number;
+
+  @Prop()
   economyClassCapacity: number;
+
+  @Prop()
+  capacity: number;
 
   @Prop()
   enabled: boolean;

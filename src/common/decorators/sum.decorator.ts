@@ -3,27 +3,30 @@ import {
   ValidationOptions,
   ValidationArguments,
 } from 'class-validator';
+import { CreateTrainDto } from '../../trains/dto/create-train.dto';
 
+// Ensure that decorator property is equal to the sum of the specified properties
 export function IsSumOf(
-  property: string,
+  property: string[],
   validationOptions?: ValidationOptions,
 ) {
-  console.log({ property });
-  return function (object: Object, propertyName: string) {
-    // console.log({ object });
+  return function (object: CreateTrainDto, propertyName: string) {
     registerDecorator({
       name: 'isSumOf',
       target: object.constructor,
       propertyName: propertyName,
-      constraints: [property],
+      constraints: property,
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          // console.log({ constraints: args.constraints });
-          const [relatedPropertyName] = args.constraints;
-          const relatedValue = (args.object as any)[relatedPropertyName];
+          const [...relatedPropertyNames] = args.constraints;
+          const relatedTotalValue = relatedPropertyNames.reduce(
+            (currTotal: number, currVal: string) =>
+              currTotal + (args.object as any)[currVal],
+            0,
+          );
           // Check if value equals both passed in values
-          return value === relatedValue;
+          return value === relatedTotalValue;
         },
       },
     });

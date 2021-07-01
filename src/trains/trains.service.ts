@@ -15,7 +15,9 @@ export class TrainsService {
   }
 
   async create(createTrain: CreateTrainDto) {
-    const newTrain = new this.trainModel(createTrain);
-    return newTrain.save();
+    const updatedTrain = Object.assign(createTrain, { enabled: true });
+    const newTrain = new this.trainModel(updatedTrain);
+    await newTrain.save();
+    return 'New train successfully created';
   }
 }
