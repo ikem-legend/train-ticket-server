@@ -98,4 +98,7 @@ export class CreateTrainDto {
     },
   )
   readonly capacity: number;
+
+  @IsBoolean()
+  readonly enabled?: boolean;
 }

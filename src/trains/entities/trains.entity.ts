@@ -1,8 +1,31 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { Expose, Transform } from 'class-transformer';
+
+export type TrainsDocument = Trains & Document;
+
+// Re-implement base Document to allow class-transformer to serialize/deserialize its properties
+// This class is needed, otherwise "_id" and "__v" would be excluded from the output
+// or improperly serialized
+class MongoDefaultDocument {
+  @Expose()
+  // Ensure that ObjectId is serialized into a string
+  @Transform((value: any) => {
+    if ('value' in value) {
+      return value.value instanceof Types.ObjectId
+        ? value.value.toHexString()
+        : value.value.toString();
+    }
+    return 'unknown value';
+  })
+  public _id: string;
+
+  @Expose()
+  public __v: number;
+}
 
 @Schema()
-export class Trains extends Document {
+export class Trains extends MongoDefaultDocument {
   @Prop()
   customId: string;
 
@@ -26,6 +49,11 @@ export class Trains extends Document {
 
   @Prop()
   enabled: boolean;
+
+  constructor(partial: Partial<Trains>) {
+    super();
+    Object.assign(this, partial);
+  }
 }
 
 export const TrainsSchema = SchemaFactory.createForClass(Trains);
