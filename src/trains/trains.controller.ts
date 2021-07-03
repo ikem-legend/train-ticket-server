@@ -14,6 +14,7 @@ import {
 import { TrainsService } from './trains.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateTrainDto } from './dto/create-train.dto';
+import { Trains } from './entities/trains.entity';
 
 @Controller('trains')
 export class TrainsController {
@@ -35,8 +36,9 @@ export class TrainsController {
     excludePrefixes: ['__'],
   })
   @Get(':id')
+  // TODO: Fix wrong user ID case for this
   async findOne(@Param('id') id: string) {
-    return this.trainsService.findOne(id);
+    return new Trains(await this.trainsService.findOne(id));
   }
 
   @UseGuards(JwtAuthGuard)
