@@ -25,7 +25,12 @@ export class UsersService {
   }
 
   async findAll() {
-    return this.userModel.find().lean();
+    const allUsers: Users[] = await this.userModel.find().lean();
+    if (!allUsers.length) {
+      return allUsers;
+    }
+    const serializedUsers = allUsers.map((userData) => new Users(userData));
+    return serializedUsers;
   }
 
   async create(createUser: CreateUserDto) {
