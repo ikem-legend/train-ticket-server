@@ -2,10 +2,10 @@ import { IsDate, IsNumber, IsString } from 'class-validator';
 
 export class CreateTicketDto {
   @IsString()
-  readonly from: string;
+  readonly origin: string;
 
   @IsString()
-  readonly to: string;
+  readonly destination: string;
 
   @IsNumber()
   readonly price: number;

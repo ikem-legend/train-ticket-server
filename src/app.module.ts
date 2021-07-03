@@ -7,6 +7,7 @@ import appConfig from './config/app.config';
 import { UsersModule } from './users/users.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { AuthModule } from './auth/auth.module';
+import { TrainsModule } from './trains/trains.module';
 import * as Joi from 'joi';
 
 const nodeEnv = process.env.NODE_ENV;
@@ -25,12 +26,13 @@ const nodeEnv = process.env.NODE_ENV;
         DATABASE_URL: Joi.string().required(),
       }),
     }),
-    UsersModule,
-    TicketsModule,
-    AuthModule,
     MongooseModule.forRootAsync({
       useFactory: () => ({ uri: appConfig().database }),
     }),
+    UsersModule,
+    TicketsModule,
+    AuthModule,
+    TrainsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

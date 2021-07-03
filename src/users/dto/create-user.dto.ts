@@ -8,6 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 
+// TODO: Fix validation pipe for auth controller
 export class CreateUserDto {
   @IsString()
   @MinLength(1, {
