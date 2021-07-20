@@ -48,6 +48,14 @@ export class Users extends MongoDefaultDocument {
   @Prop()
   dateOfBirth: Date;
 
+  @Prop()
+  @Exclude()
+  confirmationToken: string;
+
+  // TODO: Ensure that required values are also set directly in Mongoose
+  @Prop()
+  status: string;
+
   constructor(partial: Partial<Users>) {
     super();
     Object.assign(this, partial);
