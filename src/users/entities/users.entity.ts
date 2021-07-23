@@ -4,6 +4,12 @@ import { Exclude, Expose, Transform } from 'class-transformer';
 
 export type UsersDocument = Users & Document;
 
+export enum UserStatus {
+  Active = 'Active',
+  Pending = 'Pending',
+  Inactive = 'Inactive',
+}
+
 // Re-implement base Document to allow class-transformer to serialize/deserialize its properties
 // This class is needed, otherwise "_id" and "__v" would be excluded from the output
 // or improperly serialized
@@ -26,35 +32,34 @@ class MongoDefaultDocument {
 
 @Schema()
 export class Users extends MongoDefaultDocument {
-  @Prop()
-  firstName: string;
+  @Prop({ required: true })
+  firstName!: string;
 
-  @Prop()
-  lastName: string;
+  @Prop({ required: true })
+  lastName!: string;
 
-  @Prop()
-  email: string;
+  @Prop({ required: true })
+  email!: string;
 
-  @Prop()
+  @Prop({ required: true })
   @Exclude()
-  password: string;
+  password!: string;
 
-  @Prop()
-  phone: string;
+  @Prop({ required: true })
+  phone!: string;
 
-  @Prop()
-  userId: number;
+  @Prop({ required: true })
+  userId!: number;
 
-  @Prop()
-  dateOfBirth: Date;
+  @Prop({ required: true })
+  dateOfBirth!: Date;
 
-  @Prop()
+  @Prop({ required: true })
   @Exclude()
   confirmationToken: string;
 
-  // TODO: Ensure that required values are also set directly in Mongoose
-  @Prop()
-  status: string;
+  @Prop({ required: true, enum: Object.values(UserStatus) })
+  status!: string;
 
   constructor(partial: Partial<Users>) {
     super();

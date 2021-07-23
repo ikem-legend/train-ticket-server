@@ -1,10 +1,17 @@
-import { BadRequestException, Injectable, Logger, Res } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  Res,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { compare, hash } from 'bcrypt';
+import { Response } from 'express';
 import { v4 } from 'uuid';
 import { UsersService } from '../users/users.service';
-import { Users } from '../users/entities/users.entity';
+import { Users, UserStatus } from '../users/entities/users.entity';
 import { generateUserId } from '../helpers/utils';
 import { MailService } from '../mail/mail.service';
 
@@ -29,10 +36,10 @@ export class AuthService {
     return null;
   }
 
-  async login(user: Users, @Res() response) {
-    // TODO: Ensure no user login if user isn't confirmed
-    if (user.status === 'Pending') {
-      return response.status(401).send({
+  async login(user: Users, response: Response) {
+    // Ensure no user login if user isn't confirmed
+    if (!user.status || user.status === 'Pending') {
+      return response.status(HttpStatus.UNAUTHORIZED).send({
         message: 'Pending account. Please verify your email',
       });
     }
@@ -48,7 +55,8 @@ export class AuthService {
     // Check user ID existence before writing user to DB
     const userIdExists = await this.usersService.findOneByUserId(userId);
     const token = v4();
-    console.log({ token });
+    user.confirmationToken = token;
+    user.status = UserStatus.Pending;
     if (userIdExists) {
       this.register(user);
     } else {
