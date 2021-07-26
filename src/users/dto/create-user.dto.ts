@@ -36,6 +36,9 @@ export class CreateUserDto {
   @MinLength(11, {
     message: 'Phone number is too short',
   })
+  @MaxLength(15, {
+    message: 'Phone number is too long',
+  })
   readonly phone: string;
 
   @IsString()

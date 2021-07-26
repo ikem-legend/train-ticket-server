@@ -44,7 +44,9 @@ export class AuthService {
       });
     }
     const payload = { username: user.email, sub: user.userId };
-    return { access_token: this.jwtService.sign(payload) };
+    return response
+      .status(HttpStatus.OK)
+      .send({ access_token: this.jwtService.sign(payload) });
   }
 
   async register(user: Users) {
