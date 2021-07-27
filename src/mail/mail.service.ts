@@ -9,15 +9,15 @@ export class MailService {
   private readonly logger = new Logger();
 
   async sendUserConfirmation(user: Users, token: string) {
-    const url = `example.com/auth/confirm?token=${token}`;
+    const url = `https://example.com/auth/confirm?token=${token}`;
 
     await this.mailerService
       .sendMail({
         to: user.email,
         subject: 'Welcome to Train Booking App! Confirm your email',
-        template: 'confirmation',
+        template: './confirmation',
         context: {
-          user: user.firstName,
+          name: user.firstName,
           url,
         },
       })

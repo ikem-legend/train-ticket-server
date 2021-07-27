@@ -1,15 +1,15 @@
 import {
   BadRequestException,
+  HttpException,
   HttpStatus,
   Injectable,
   Logger,
-  Res,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { compare, hash } from 'bcrypt';
 import { Response } from 'express';
-import { v4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from '../users/users.service';
 import { Users, UserStatus } from '../users/entities/users.entity';
 import { generateUserId } from '../helpers/utils';
@@ -28,35 +28,39 @@ export class AuthService {
 
   async validateUser(email: string, pass: string) {
     const user = await this.usersService.findOne(email);
-    const passwordCompare = await compare(pass, user.password);
-    if (user && passwordCompare) {
-      const { password, ...result } = user;
-      return result;
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
     }
-    return null;
+    const passwordCompare = await compare(pass, user.password);
+    if (!passwordCompare) {
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+    }
+    const { password, ...result } = user;
+    return result;
   }
 
-  async login(user: Users, response: Response) {
+  async login(user: Users, response: Response): Promise<void> {
+    // Since an error will be thrown if user does not exist, no need to duplicate the check here
     // Ensure no user login if user isn't confirmed
     if (!user.status || user.status === 'Pending') {
-      return response.status(HttpStatus.UNAUTHORIZED).send({
+      response.status(HttpStatus.UNAUTHORIZED).send({
         message: 'Pending account. Please verify your email',
       });
     }
     const payload = { username: user.email, sub: user.userId };
-    return response
+    response
       .status(HttpStatus.OK)
       .send({ access_token: this.jwtService.sign(payload) });
   }
 
-  async register(user: Users) {
+  async register(user: Users): Promise<string> {
     const saltRounds = Number(this.configService.get('saltRounds', 10));
     user.password = await hash(user.password, saltRounds);
     const userId = generateUserId();
     user.userId = userId;
     // Check user ID existence before writing user to DB
     const userIdExists = await this.usersService.findOneByUserId(userId);
-    const token = v4();
+    const token = uuidv4();
     user.confirmationToken = token;
     user.status = UserStatus.Pending;
     if (userIdExists) {
@@ -82,6 +86,21 @@ export class AuthService {
           );
         }
       }
+    }
+  }
+
+  async confirm(confirmationToken: string): Promise<string> {
+    const user = await this.usersService.findOneByToken(confirmationToken);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    user.status = UserStatus.Active;
+    try {
+      await this.usersService.edit(user._id, user);
+      return 'User confirmed successfully';
+    } catch (err) {
+      this.logger.error(err);
+      throw new BadRequestException('Error confirming user, please try again');
     }
   }
 }

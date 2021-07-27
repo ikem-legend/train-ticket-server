@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
+  Param,
   Post,
   Request,
   Res,
@@ -27,7 +29,13 @@ export class AuthController {
 
   @Public()
   @Post('/register')
-  async register(@Body() body) {
+  async register(@Body() body): Promise<string> {
     return this.authService.register(body);
+  }
+
+  @Public()
+  @Get('/confirm/:token')
+  async confirm(@Param('token') token: string): Promise<string> {
+    return this.authService.confirm(token);
   }
 }
