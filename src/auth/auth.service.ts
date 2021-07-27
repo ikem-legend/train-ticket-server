@@ -78,7 +78,7 @@ export class AuthService {
           await this.usersService.create(user).then(() => {
             this.mailService.sendUserConfirmation(user, token);
           });
-          return 'User successfully created';
+          return 'User registered successfully. Please verify your email';
         } catch (err) {
           this.logger.error(err);
           throw new BadRequestException(
