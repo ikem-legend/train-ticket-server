@@ -21,10 +21,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard) // JwtGuard globally set but test this
   @Post('/login')
   async login(@Request() req, @Res() response: Response) {
-    const res = await this.authService.login(req.user, response);
-    return response
-      .status(HttpStatus.OK)
-      .send({ message: 'Success login', data: res });
+    return this.authService.login(req.user, response);
   }
 
   @Public()

@@ -9,6 +9,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
+import { UserLoginListener } from '../users/listeners/user-login.listener';
+import { UserCreatedListener } from '../users/listeners/user-created.listener';
 // import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Module({
@@ -27,6 +29,8 @@ import { JwtStrategy } from './jwt.strategy';
     AuthService,
     LocalStrategy,
     JwtStrategy,
+    UserLoginListener,
+    UserCreatedListener,
     // { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
   exports: [AuthService, JwtModule],

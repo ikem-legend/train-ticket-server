@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import * as Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import appConfig from './config/app.config';
@@ -9,7 +11,6 @@ import { TicketsModule } from './tickets/tickets.module';
 import { AuthModule } from './auth/auth.module';
 import { TrainsModule } from './trains/trains.module';
 import { MailModule } from './mail/mail.module';
-import * as Joi from 'joi';
 
 const nodeEnv = process.env.NODE_ENV;
 
@@ -30,6 +31,7 @@ const nodeEnv = process.env.NODE_ENV;
     MongooseModule.forRootAsync({
       useFactory: () => ({ uri: appConfig().database }),
     }),
+    EventEmitterModule.forRoot(),
     UsersModule,
     TicketsModule,
     AuthModule,

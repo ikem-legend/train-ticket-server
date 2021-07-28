@@ -7,13 +7,15 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { compare, hash } from 'bcrypt';
 import { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from '../users/users.service';
 import { Users, UserStatus } from '../users/entities/users.entity';
 import { generateUserId } from '../helpers/utils';
-import { MailService } from '../mail/mail.service';
+import { UserLoginEvent } from '../users/events/user-login.event';
+import { UserCreatedEvent } from '../users/events/user-created.event';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +23,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly mailService: MailService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   private readonly logger = new Logger();
@@ -47,6 +49,9 @@ export class AuthService {
         message: 'Pending account. Please verify your email',
       });
     }
+    const userLoginEvent = new UserLoginEvent();
+    userLoginEvent.email = user.email;
+    this.eventEmitter.emit('user.login', userLoginEvent);
     const payload = { username: user.email, sub: user.userId };
     response
       .status(HttpStatus.OK)
@@ -73,10 +78,15 @@ export class AuthService {
           'Phone number already exists',
         );
       } else {
+        this.logger.log('Signup successful');
         this.logger.log({ user });
         try {
           await this.usersService.create(user).then(() => {
-            this.mailService.sendUserConfirmation(user, token);
+            const userCreatedEvent = new UserCreatedEvent();
+            userCreatedEvent.name = user.firstName;
+            userCreatedEvent.email = user.email;
+            userCreatedEvent.token = token;
+            this.eventEmitter.emit('user.created', userCreatedEvent);
           });
           return 'User registered successfully. Please verify your email';
         } catch (err) {
