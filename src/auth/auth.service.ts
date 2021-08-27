@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -16,6 +17,9 @@ import { Users, UserStatus } from '../users/entities/users.entity';
 import { generateUserId } from '../helpers/utils';
 import { UserLoginEvent } from '../users/events/user-login.event';
 import { UserCreatedEvent } from '../users/events/user-created.event';
+import { UserPasswordResetEvent } from '../users/events/user-password-reset.event';
+import { ForgotPasswordDto } from '../users/dto/forgot-password.dto';
+import { ResetUserPasswordDto } from '../users/dto/reset-user-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -41,11 +45,11 @@ export class AuthService {
     return result;
   }
 
-  async login(user: Users, response: Response): Promise<void> {
+  async login(user: Users, response: Response): Promise<Response> {
     // Since an error will be thrown if user does not exist, no need to duplicate the check here
     // Ensure no user login if user isn't confirmed
     if (!user.status || user.status === 'Pending') {
-      response.status(HttpStatus.UNAUTHORIZED).send({
+      return response.status(HttpStatus.UNAUTHORIZED).send({
         message: 'Pending account. Please verify your email',
       });
     }
@@ -53,7 +57,7 @@ export class AuthService {
     userLoginEvent.email = user.email;
     this.eventEmitter.emit('user.login', userLoginEvent);
     const payload = { username: user.email, sub: user.userId };
-    response
+    return response
       .status(HttpStatus.OK)
       .send({ access_token: this.jwtService.sign(payload) });
   }
@@ -91,7 +95,7 @@ export class AuthService {
           return 'User registered successfully. Please verify your email';
         } catch (err) {
           this.logger.error(err);
-          throw new BadRequestException(
+          throw new InternalServerErrorException(
             'Error creating user. Please try again',
           );
         }
@@ -110,7 +114,55 @@ export class AuthService {
       return 'User confirmed successfully';
     } catch (err) {
       this.logger.error(err);
-      throw new BadRequestException('Error confirming user, please try again');
+      throw new InternalServerErrorException(
+        'Error confirming user, please try again',
+      );
+    }
+  }
+
+  async forgotPassword(userInfo: ForgotPasswordDto): Promise<string> {
+    const user = await this.usersService.findOne(userInfo.email);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    // Generate token and send email with new user token
+    const token = uuidv4();
+    user.confirmationToken = token;
+    try {
+      await this.usersService.edit(user._id, user).then(() => {
+        const userPasswordResetEvent = new UserPasswordResetEvent();
+        userPasswordResetEvent.name = user.firstName;
+        userPasswordResetEvent.email = user.email;
+        userPasswordResetEvent.token = user.confirmationToken;
+        this.eventEmitter.emit('user.passwordReset', userPasswordResetEvent);
+      });
+      return 'Please check your email for reset password link';
+    } catch (err) {
+      this.logger.error(err);
+      throw new InternalServerErrorException(
+        'Error updating user details for password reset. Please try again',
+      );
+    }
+  }
+
+  async resetPassword(userData: ResetUserPasswordDto): Promise<string> {
+    const user = await this.usersService.findOne(userData.email);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    if (user.confirmationToken !== userData.confirmationToken) {
+      return 'Invalid token';
+    }
+    try {
+      const saltRounds = Number(this.configService.get('saltRounds', 10));
+      user.password = await hash(userData.password, saltRounds);
+      await this.usersService.edit(user._id, user);
+      return 'Password successfully reset. Please log in';
+    } catch (err) {
+      this.logger.error(err);
+      throw new InternalServerErrorException(
+        'Error resetting password. Please try again',
+      );
     }
   }
 }

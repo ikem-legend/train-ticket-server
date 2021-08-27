@@ -11,6 +11,7 @@ import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
 import { UserLoginListener } from '../users/listeners/user-login.listener';
 import { UserCreatedListener } from '../users/listeners/user-created.listener';
+import { UserPasswordResetListener } from '../users/listeners/user-password-reset.listener';
 // import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Module({
@@ -31,6 +32,7 @@ import { UserCreatedListener } from '../users/listeners/user-created.listener';
     JwtStrategy,
     UserLoginListener,
     UserCreatedListener,
+    UserPasswordResetListener,
     // { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
   exports: [AuthService, JwtModule],
