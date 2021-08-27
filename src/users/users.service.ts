@@ -25,6 +25,10 @@ export class UsersService {
     return this.userModel.findOne({ phone }).exec();
   }
 
+  async findOneByToken(confirmationToken: string) {
+    return this.userModel.findOne({ confirmationToken }).lean();
+  }
+
   async findAll() {
     const allUsers: Users[] = await this.userModel.find().lean();
     if (!allUsers.length) {
